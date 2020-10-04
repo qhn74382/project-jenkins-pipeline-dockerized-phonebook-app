@@ -16,7 +16,6 @@ services:
         networks:
             - clarusnet
     app-server:
-        env_file: .env
         image: "368269121510.dkr.ecr.us-east-1.amazonaws.com/clarusway-repo/phonebook-app:latest"
         deploy:
             mode: global

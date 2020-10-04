@@ -130,14 +130,14 @@ pipeline{
         }
 
         failure {
-            echo 'Delete the image repository on ECR due to failure'
+            echo 'Deleting the image repository on ECR due to failure'
             sh """
                 aws ecr delete-repository \
                   --repository-name ${APP_REPO_NAME} \
                   --region ${AWS_REGION}\
                   --force
             """
-            echo 'Deleting the Cloudformation stack due to failure'
+            echo 'Deleting the cloudformation stack due to failure'
             sh 'aws cloudformation delete-stack --region ${AWS_REGION} --stack-name ${AWS_STACK_NAME}'
         }
     }
