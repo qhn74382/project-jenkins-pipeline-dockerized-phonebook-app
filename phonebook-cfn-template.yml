@@ -21,7 +21,7 @@ Resources:
               - ec2-instance-connect:SendSSHPublicKey
             Resource:
               - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*
-            Condition: { "StringEquals": { "aws:ResourceTag/project": "204" } }
+            Condition: { "StringEquals": { "aws:ResourceTag/project": "p204" } }
           - Effect: Allow
             Action:
               - ec2:DescribeInstances
