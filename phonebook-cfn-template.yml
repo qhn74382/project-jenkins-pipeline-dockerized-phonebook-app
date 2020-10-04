@@ -198,7 +198,7 @@ Resources:
         - Key: Name
           Value: !Sub Docker Manager 2 of ${AWS::StackName}
         - Key: project
-          Value: "204"
+          Value: "p204"
   DockerManager3:
     Type: "AWS::EC2::Instance"
     DependsOn:
@@ -211,7 +211,7 @@ Resources:
         - Key: Name
           Value: !Sub Docker Manager 3 of ${AWS::StackName}
         - Key: project
-          Value: "204"
+          Value: "p204"
   DockerWorker1:
     Type: "AWS::EC2::Instance"
     DependsOn:
@@ -224,7 +224,7 @@ Resources:
         - Key: Name
           Value: !Sub Docker Worker 1 of ${AWS::StackName}
         - Key: project
-          Value: "203"
+          Value: "p204"
   DockerWorker2:
     Type: "AWS::EC2::Instance"
     DependsOn:
@@ -237,7 +237,7 @@ Resources:
         - Key: Name
           Value: !Sub Docker Worker 2 of ${AWS::StackName}
         - Key: project
-          Value: "203"
+          Value: "p204"
 Outputs:
   VizDashboard:
     Description: Dashboard URL
