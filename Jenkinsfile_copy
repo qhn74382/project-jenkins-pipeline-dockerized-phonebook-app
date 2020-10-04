@@ -1,44 +1,46 @@
 pipeline{
 
     agent { label "master" }
-    
+
     environment {
-        ECR_REGISTRY = "368269121510.dkr.ecr.us-east-1.amazonaws.com"
-        APP_REPO_NAME = "quynh-repo/phonebook-app"
+        ECR_REGISTRY = "046402772087.dkr.ecr.us-east-1.amazonaws.com"
+        APP_REPO_NAME = "call-repo/phonebook-app"
         AWS_REGION = "us-east-1"
-        AWS_STACK_NAME = "Quynh-Phonebook-App-${BUILD_NUMBER}"
-        CFN_KEYPAIR = "qhn"
+        AWS_STACK_NAME = "Call-Phonebook-App-${BUILD_NUMBER}"
+        CFN_KEYPAIR = "call.lp"
         HOME_FOLDER = "/home/ec2-user"
         GIT_FOLDER = sh(script:'echo ${GIT_URL} | sed "s/.*\\///;s/.git$//"', returnStdout:true).trim()
         PATH=sh(script:"echo $PATH:/usr/local/bin", returnStdout:true).trim()
-        APP_NAME ="phonebook"
+        APP_NAME="phonebook"
+
     }
 
     stages {
-        stage('Create ECR Repo'){
+        
+        stage('Create ECR Repo') {
             steps {
                 echo 'Creating ECR Repository'
                 sh """
                 aws ecr create-repository \
-                    --repository-name ${APP_REPO_NAME} \
-                    --image-scanning-configuration scanOnPush=false \
-                    --image-tag-mutability MUTABLE \
-                    --region ${AWS_REGION}
+                  --repository-name ${APP_REPO_NAME} \
+                  --image-scanning-configuration scanOnPush=false \
+                  --image-tag-mutability MUTABLE \
+                  --region ${AWS_REGION}
                 """
             }
         }
 
-        stage('Build App Docker Images'){
+        stage('Build App Docker Image'){
             steps {
-                echo 'Building app Docker Images'
+                echo 'Building app Docker image'
                 sh 'docker build --force-rm -t "${ECR_REGISTRY}/${APP_REPO_NAME}:latest" .'
-                sh ' docker image ls'
+                sh 'docker image ls'
             }
         }
 
         stage('Push Docker Images to ECR Repo'){
             steps {
-                echo 'Push Docker Images to ECR'
+                echo 'Pushing images to ECR'
                 sh 'aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${ECR_REGISTRY}'
                 sh 'docker push "${ECR_REGISTRY}/${APP_REPO_NAME}:latest"'
             }
@@ -66,25 +68,26 @@ pipeline{
                 }
             }
         }
-
+        
         stage('Test the Infrastructure'){
             steps {
                 echo "Testing if Docker Swarm is ready or not by checking the Viz App on Grand Master with Public IP:${MASTER_INSTANCE_PUBLIC_IP}:8080"
 
                 script {
+
                     while(true) {
                         try{
                             sh "curl -s ${MASTER_INSTANCE_PUBLIC_IP}:8080"
-                            echo "Successfully connected to Viz App."
+                            echo "Successfull connected to Viz App."
                             break
                         }
                         catch(Exception){
-                            echo "Could not connect to Viz App"
+                            echo 'Could not connect to Viz App'
                             sleep(5)
-
                         }
                     }
                 }
+
             }
         }
 
@@ -97,13 +100,15 @@ pipeline{
                 sh 'mssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no --region ${AWS_REGION} ${MASTER_INSTANCE_ID} git clone ${GIT_URL}'
                 sleep(10)
                 sh 'mssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no --region ${AWS_REGION} ${MASTER_INSTANCE_ID} docker stack deploy --with-registry-auth -c ${HOME_FOLDER}/${GIT_FOLDER}/docker-compose.yml ${APP_NAME}'
+
             }
         }
-
+        
         stage('Test the application'){
             steps {
                 echo 'Check if the application is ready or not'
                 script {
+
                     while(true) {
                         try{
                             sh "curl -s ${MASTER_INSTANCE_PUBLIC_IP}"
@@ -127,14 +132,14 @@ pipeline{
         }
 
         failure {
-            echo 'Delete the image repository on ECR due to failure'
+            echo 'Deleting the image repository on ECR due to failure'
             sh """
                 aws ecr delete-repository \
                   --repository-name ${APP_REPO_NAME} \
                   --region ${AWS_REGION}\
                   --force
             """
-            echo 'Deleting the Cloudformation stack due to failure'
+            echo 'Deleting the cloudformation stack due to failure'
             sh 'aws cloudformation delete-stack --region ${AWS_REGION} --stack-name ${AWS_STACK_NAME}'
         }
     }
