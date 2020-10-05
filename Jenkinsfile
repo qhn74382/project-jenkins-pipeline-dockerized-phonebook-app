@@ -32,7 +32,7 @@ pipeline{
             steps {
                 echo 'Building app Docker Images'
                 sh 'docker build --force-rm -t "${ECR_REGISTRY}/${APP_REPO_NAME}:latest" .'
-                sh ' docker image ls'
+                sh 'docker image ls'
             }
         }
 

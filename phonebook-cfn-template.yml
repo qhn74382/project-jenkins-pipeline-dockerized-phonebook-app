@@ -21,7 +21,7 @@ Resources:
               - ec2-instance-connect:SendSSHPublicKey
             Resource:
               - !Sub arn:aws:ec2:${AWS::Region}:${AWS::AccountId}:instance/*
-            Condition: { "StringEquals": { "aws:ResourceTag/project": "p204" } }
+            Condition: { "StringEquals": { "aws:ResourceTag/project": "203" } }
           - Effect: Allow
             Action:
               - ec2:DescribeInstances
@@ -90,7 +90,8 @@ Resources:
         IamInstanceProfile:
           Arn: !GetAtt EC2ConnectProfile.Arn
         UserData:
-          Fn::Base64: !Sub |
+          Fn::Base64: 
+          !Sub |
             #! /bin/bash
             yum update -y
             amazon-linux-extras install docker -y
@@ -216,7 +217,7 @@ Resources:
   DockerWorker1:
     Type: "AWS::EC2::Instance"
     DependsOn:
-      - DockerManager1
+      - DockerManager2
     Properties:
       LaunchTemplate:
         LaunchTemplateId: !Ref WorkersLT
