@@ -159,7 +159,7 @@ Resources:
         - Key: project
           Value: "p204"
           Key: server
-            Value: docker-grand-master
+          Value: docker-grand-master
       UserData:
         Fn::Base64: |
           #! /bin/bash
